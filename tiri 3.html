@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<title>Kari Ni Tiri - Score Keeper</title>
+
+<style>
+
+/* =========================
+   RESET - SAFARI SAFE
+========================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+    font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+}
+
+
+:root{
+
+    --primary:#4f46e5;
+    --success:#22c55e;
+    --danger:#ef4444;
+
+    --glass:rgba(255,255,255,.16);
+
+    --shadow:
+    0 20px 50px rgba(0,0,0,.25);
+
+}
+
+
+/* =========================
+   BODY
+========================= */
+
+body{
+
+    min-height:100vh;
+
+    padding:25px;
+
+    background:
+    linear-gradient(
+        -45deg,
+        #667eea,
+        #764ba2,
+        #43cea2,
+        #185a9d
+    );
+
+    background-size:400% 400%;
+
+    animation:bgMove 15s infinite;
+
+    -webkit-tap-highlight-color:transparent;
+
+}
+
+
+
+@keyframes bgMove{
+
+    0%{
+        background-position:0% 50%;
+    }
+
+    50%{
+        background-position:100% 50%;
+    }
+
+    100%{
+        background-position:0% 50%;
+    }
+
+}
+
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+
+.container{
+
+    max-width:1500px;
+
+    margin:auto;
+
+    padding:30px;
+
+    border-radius:30px;
+
+    background:
+    rgba(255,255,255,.12);
+
+
+    /* Safari support */
+    -webkit-backdrop-filter:blur(20px);
+
+    backdrop-filter:blur(20px);
+
+
+    box-shadow:var(--shadow);
+
+}
+
+
+
+/* =========================
+   TITLE
+========================= */
+
+
+.title{
+
+    text-align:center;
+
+    color:white;
+
+    margin-bottom:35px;
+
+}
+
+
+
+.title h1{
+
+    font-size:45px;
+
+    font-weight:700;
+
+}
+
+
+
+.title p{
+
+    opacity:.85;
+
+    margin-top:8px;
+
+}
+
+
+
+/* =========================
+   CARD
+========================= */
+
+
+.card{
+
+    background:var(--glass);
+
+    color:white;
+
+    padding:22px;
+
+    border-radius:20px;
+
+    box-shadow:var(--shadow);
+
+}
+
+
+
+.card h3{
+
+    margin-bottom:15px;
+
+}
+
+
+
+label{
+
+    display:block;
+
+    font-weight:600;
+
+    margin-bottom:10px;
+
+}
+
+
+
+/* =========================
+   INPUT + SELECT
+   SAFARI FIX
+========================= */
+
+
+select,
+input{
+
+    width:100%;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:12px;
+
+    outline:none;
+
+    font-size:15px;
+
+    background:white;
+
+    color:#222;
+
+    -webkit-appearance:none;
+
+    appearance:none;
+
+}
+
+
+
+/* =========================
+   GAME INFO
+========================= */
+
+
+.game-info{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(250px,1fr));
+
+    gap:20px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* =========================
+   PARTNER AREA
+========================= */
+
+
+.partner-section{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(300px,1fr));
+
+    gap:20px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* =========================
+   PLAYER CONTROL
+========================= */
+
+
+.player-panel{
+
+    display:flex;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    margin:25px 0;
+
+}
+
+
+
+.player-panel input{
+
+    flex:1;
+
+    min-width:250px;
+
+}
+
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+
+button{
+
+    border:none;
+
+    border-radius:12px;
+
+    padding:13px 22px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-weight:600;
+
+    transition:.3s;
+
+
+    /* Safari touch fix */
+    touch-action:manipulation;
+
+}
+
+
+
+button:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+    0 10px 20px rgba(0,0,0,.25);
+
+}
+
+
+
+.add{
+
+    background:var(--success);
+
+}
+
+
+.round{
+
+    background:var(--primary);
+
+}
+
+
+.reset{
+
+    background:var(--danger);
+
+}
+ 
+/* =========================
+   STATISTICS
+========================= */
+
+
+.stats{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+    gap:20px;
+
+    margin-bottom:30px;
+
+}
+
+
+
+.stat-card{
+
+    background:
+    rgba(255,255,255,.18);
+
+    color:white;
+
+    padding:25px;
+
+    text-align:center;
+
+    border-radius:20px;
+
+    box-shadow:var(--shadow);
+
+}
+
+
+
+.stat-card span{
+
+    display:block;
+
+    margin-top:10px;
+
+    font-size:35px;
+
+    font-weight:bold;
+
+}
+
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+
+.dashboard{
+
+    display:grid;
+
+    grid-template-columns:
+    2.5fr 1fr;
+
+    gap:25px;
+
+}
+
+
+
+.table-card{
+
+    background:white;
+
+    border-radius:20px;
+
+    overflow-x:auto;
+
+    -webkit-overflow-scrolling:touch;
+
+}
+
+
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+thead{
+
+    background:#23374d;
+
+    color:white;
+
+}
+
+
+
+th{
+
+    padding:15px;
+
+}
+
+
+
+td{
+
+    padding:12px;
+
+    text-align:center;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+
+
+tbody tr:nth-child(even){
+
+    background:#f7f9fc;
+
+}
+
+
+
+tfoot{
+
+    background:#edf2f7;
+
+    font-weight:bold;
+
+}
+
+
+
+.score-input{
+
+    width:65px;
+
+    font-size:16px;
+
+    text-align:center;
+
+}
+
+
+
+/* =========================
+   LEADER
+========================= */
+
+
+.leader{
+
+    min-height:280px;
+
+    border-radius:20px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #43cea2,
+        #185a9d
+    );
+
+    color:white;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    padding:30px;
+
+}
+
+
+
+.badge{
+
+    margin-top:20px;
+
+    background:gold;
+
+    color:#222;
+
+    padding:15px 30px;
+
+    border-radius:40px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+}
+
+
+
+/* =========================
+   REMOVE BUTTON
+========================= */
+
+
+.remove-btn{
+
+    margin-top:8px;
+
+    padding:5px 12px;
+
+    background:#ef4444;
+
+    border-radius:8px;
+
+    font-size:12px;
+
+}
+
+
+
+.remove-btn:hover{
+
+    background:#b91c1c;
+
+}
+
+
+
+/* =========================
+   MOBILE
+========================= */
+
+
+@media(max-width:900px){
+
+
+.dashboard{
+
+    grid-template-columns:1fr;
+
+}
+
+
+}
+
+
+
+@media(max-width:600px){
+
+
+body{
+
+    padding:10px;
+
+}
+
+
+.container{
+
+    padding:15px;
+
+}
+
+
+.title h1{
+
+    font-size:30px;
+
+}
+
+
+.player-panel{
+
+    flex-direction:column;
+
+}
+
+
+button{
+
+    width:100%;
+
+}
+
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<header class="title">
+
+<h1>
+🃏 ♠ 3
+</h1>
+
+<p>
+Scoring
+</p>
+
+</header>
+
+
+
+<!-- =========================
+     GAME SETTINGS
+========================= -->
+
+
+<section class="game-info">
+
+
+<div class="card">
+
+<label>
+👤 Highest Bidder
+</label>
+
+
+<select id="highestBidder">
+
+<option value="">
+Select Player
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+
+<label>
+🎯 Bid Points
+</label>
+
+
+<select id="bidPoints">
+
+</select>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+
+<label>
+♠ Wild Suit
+</label>
+
+
+<select id="wildSuit">
+
+<option>
+♠ Spades
+</option>
+
+
+<option>
+♥ Hearts
+</option>
+
+
+<option>
+♦ Diamonds
+</option>
+
+
+<option>
+♣ Clubs
+</option>
+
+
+</select>
+
+
+</div>
+
+
+</section>
+
+
+
+
+<!-- =========================
+     PARTNERS
+========================= -->
+
+
+<section class="partner-section">
+
+
+<div class="card">
+
+
+<h3>
+🃏 Partner Cards
+</h3>
+
+
+<div id="partnerCardsContainer">
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+🤝 Partners
+</h3>
+
+
+<div id="partnerNamesContainer">
+
+</div>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+<!-- =========================
+     PLAYER BUTTONS
+========================= -->
+
+
+<section class="player-panel">
+
+
+<input 
+id="playerName"
+placeholder="Enter Player Name"
+>
+
+
+
+<button class="add">
+
+➕ Add Player
+
+</button>
+
+
+
+<button class="round">
+
+🎲 Add Round
+
+</button>
+
+
+
+<button class="reset">
+
+🧹 Reset
+
+</button>
+
+
+</section>
+
+
+
+
+
+<!-- =========================
+     STATISTICS
+========================= -->
+
+
+<section class="stats">
+
+
+<div class="stat-card">
+
+<h4>
+Players
+</h4>
+
+<span id="playerCount">
+0
+</span>
+
+</div>
+
+
+
+
+<div class="stat-card">
+
+<h4>
+Rounds
+</h4>
+
+<span id="roundCount">
+0
+</span>
+
+</div>
+
+
+
+
+
+<div class="stat-card">
+
+<h4>
+Highest Score
+</h4>
+
+<span id="highestScore">
+0
+</span>
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+<!-- =========================
+     SCORE DASHBOARD
+========================= -->
+
+
+<section class="dashboard">
+
+
+
+<div class="table-card">
+
+
+<table>
+
+
+<thead>
+
+
+<tr id="headerRow">
+
+
+<th>
+Round
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+<tbody id="scoreBody">
+
+</tbody>
+
+
+
+
+<tfoot>
+
+
+<tr id="totalRow">
+
+
+<td>
+Total
+</td>
+
+
+</tr>
+
+
+</tfoot>
+
+
+
+</table>
+
+
+
+</div>
+
+
+
+
+
+<aside class="leader">
+
+
+<h2>
+🏆 Current Leader
+</h2>
+
+
+
+<div class="badge">
+
+No Scores Yet
+
+</div>
+
+
+</aside>
+
+
+
+</section>
+
+
+
+</div>
+<script>
+
+/********************************************
+ GLOBAL DATA
+********************************************/
+
+let players = [];
+
+let rounds = [];
+
+let roundCount = 0;
+
+
+const playerColors = [
+
+"#3498db",
+"#2ecc71",
+"#9b59b6",
+"#f39c12",
+"#e74c3c",
+"#16a085",
+"#d35400",
+"#34495e"
+
+];
+
+
+
+/********************************************
+ APP START
+********************************************/
+
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+    populateBidPoints();
+
+
+    document
+    .querySelector(".add")
+    .addEventListener(
+        "click",
+        addPlayer
+    );
+
+
+    document
+    .querySelector(".round")
+    .addEventListener(
+        "click",
+        addRound
+    );
+
+
+    document
+    .querySelector(".reset")
+    .addEventListener(
+        "click",
+        resetGame
+    );
+
+
+    createPartnerCardSelectors();
+
+    createPartnerNameSelectors();
+
+
+});
+
+
+
+
+
+/********************************************
+ BID POINTS
+Safari Fix
+********************************************/
+
+
+function populateBidPoints(){
+
+
+const bid =
+document.getElementById(
+"bidPoints"
+);
+
+
+
+for(
+let i=275;
+i<=500;
+i+=5
+){
+
+
+bid.insertAdjacentHTML(
+
+"beforeend",
+
+`
+<option value="${i}">
+${i}
+</option>
+`
+
+);
+
+
+}
+
+
+}
+
+
+
+
+
+/********************************************
+ PLAYER MANAGEMENT
+********************************************/
+
+
+function addPlayer(){
+
+
+let input =
+document.getElementById(
+"playerName"
+);
+
+
+
+let name =
+input.value.trim();
+
+
+
+if(!name){
+
+
+alert(
+"Enter player name"
+);
+
+
+return;
+
+}
+
+
+
+
+if(
+players.some(
+function(p){
+
+return p.name.toLowerCase()
+===
+name.toLowerCase();
+
+}
+
+)
+
+){
+
+
+alert(
+"Player already exists"
+);
+
+
+return;
+
+}
+
+
+
+
+players.push({
+
+name:name,
+
+color:
+playerColors[
+players.length %
+playerColors.length
+]
+
+
+});
+
+
+
+input.value="";
+
+
+
+refreshPlayerUI();
+
+
+}
+
+
+
+
+
+function removePlayer(name){
+
+
+if(
+!confirm(
+"Remove " + name + "?"
+)
+
+){
+
+return;
+
+}
+
+
+
+players =
+players.filter(
+
+function(p){
+
+return p.name !== name;
+
+}
+
+);
+
+
+
+refreshPlayerUI();
+
+
+}
+
+
+
+
+
+function refreshPlayerUI(){
+
+
+buildTableHeader();
+
+buildTotalRow();
+
+updateBidderDropdown();
+
+updateStatistics();
+
+refreshPartnerDropdowns();
+
+
+}
+
+
+
+
+
+
+
+/********************************************
+ PLAYER TABLE HEADER
+Safari Safe Remove Button
+********************************************/
+
+
+function buildTableHeader(){
+
+
+const header =
+document.getElementById(
+"headerRow"
+);
+
+
+
+header.innerHTML =
+
+`
+<th>
+Round
+</th>
+`;
+
+
+
+players.forEach(
+
+function(player){
+
+
+header.insertAdjacentHTML(
+
+"beforeend",
+
+`
+
+<th style="
+background:${player.color}
+">
+
+${player.name}
+
+
+<br>
+
+
+<button
+
+class="remove-btn"
+
+data-player="${player.name}"
+
+>
+
+✖ Remove
+
+</button>
+
+
+</th>
+
+
+`
+
+);
+
+
+});
+
+
+}
+
+
+
+
+
+/********************************************
+ SAFARI CLICK HANDLER
+********************************************/
+
+
+document.addEventListener(
+
+"click",
+
+function(event){
+
+
+if(
+event.target.classList.contains(
+"remove-btn"
+)
+
+){
+
+
+removePlayer(
+event.target.dataset.player
+);
+
+
+}
+
+
+}
+
+);
+
+
+
+
+
+
+
+/********************************************
+ TOTAL ROW
+********************************************/
+
+
+function buildTotalRow(){
+
+
+const row =
+document.getElementById(
+"totalRow"
+);
+
+
+
+row.innerHTML =
+
+`
+
+<td>
+Total
+</td>
+
+`;
+
+
+
+players.forEach(
+
+function(player){
+
+
+row.insertAdjacentHTML(
+
+"beforeend",
+
+`
+
+<td id="total-${player.name}">
+0
+</td>
+
+`
+
+);
+
+
+});
+
+
+}
+
+
+
+
+
+
+/********************************************
+ BIDDER DROPDOWN
+********************************************/
+
+
+function updateBidderDropdown(){
+
+
+const box =
+document.getElementById(
+"highestBidder"
+);
+
+
+
+box.innerHTML =
+
+`
+<option value="">
+Select Player
+</option>
+`;
+
+
+
+players.forEach(
+
+function(player){
+
+
+box.insertAdjacentHTML(
+
+"beforeend",
+
+`
+
+<option value="${player.name}">
+${player.name}
+</option>
+
+`
+
+);
+
+
+});
+
+
+}
+
+
+
+
+
+
+/********************************************
+ STATISTICS
+********************************************/
+
+
+function updateStatistics(){
+
+
+document
+.getElementById(
+"playerCount"
+)
+.innerHTML =
+players.length;
+
+
+
+document
+.getElementById(
+"roundCount"
+)
+.innerHTML =
+roundCount;
+
+
+}
+
+
+
+
+
+
+
+/********************************************
+ ROUND MANAGEMENT
+********************************************/
+
+
+function addRound(){
+
+
+if(players.length===0){
+
+
+alert(
+"Add players first"
+);
+
+
+return;
+
+}
+
+
+
+roundCount++;
+
+
+
+let tbody =
+document.getElementById(
+"scoreBody"
+);
+
+
+
+let row =
+document.createElement(
+"tr"
+);
+
+
+
+row.innerHTML =
+
+`
+
+<td>
+Round ${roundCount}
+</td>
+
+`;
+
+
+
+players.forEach(
+
+function(player){
+
+
+row.insertAdjacentHTML(
+
+"beforeend",
+
+`
+
+<td>
+
+<input
+
+type="number"
+
+value="0"
+
+class="score-input"
+
+data-player="${player.name}"
+
+>
+
+</td>
+
+`
+
+);
+
+
+});
+
+
+
+tbody.appendChild(row);
+
+
+
+attachScoreEvents();
+
+
+updateStatistics();
+
+
+
+}
+
+
+
+
+
+
+
+function attachScoreEvents(){
+
+
+document
+.querySelectorAll(
+".score-input"
+)
+.forEach(
+
+function(input){
+
+
+input.oninput =
+calculateTotals;
+
+
+}
+
+);
+
+
+}
+
+
+
+
+
+
+
+/********************************************
+ SCORE CALCULATION
+********************************************/
+
+
+function calculateTotals(){
+
+
+let totals = {};
+
+
+
+players.forEach(
+
+function(player){
+
+totals[player.name]=0;
+
+}
+
+);
+
+
+
+
+document
+.querySelectorAll(
+".score-input"
+)
+.forEach(
+
+function(input){
+
+
+let player =
+input.dataset.player;
+
+
+
+totals[player]
++=
+Number(input.value)||0;
+
+
+}
+
+);
+
+
+
+
+
+players.forEach(
+
+function(player){
+
+
+let cell =
+document.getElementById(
+"total-" + player.name
+);
+
+
+
+if(cell){
+
+
+cell.innerHTML =
+totals[player.name];
+
+
+}
+
+
+});
+
+
+
+updateHighestScore(totals);
+
+updateLeader(totals);
+
+
+
+}
+
+
+
+
+
+
+
+function updateHighestScore(totals){
+
+
+let highest=0;
+
+
+
+Object.values(totals)
+.forEach(
+
+function(score){
+
+
+if(score>highest){
+
+highest=score;
+
+}
+
+
+}
+
+);
+
+
+
+document
+.getElementById(
+"highestScore"
+)
+.innerHTML =
+highest;
+
+
+}
+
+
+
+
+
+
+function updateLeader(totals){
+
+
+let winner="";
+
+let score=-Infinity;
+
+
+
+Object.entries(totals)
+.forEach(
+
+function(item){
+
+
+let name=item[0];
+
+let total=item[1];
+
+
+
+if(total>score){
+
+score=total;
+
+winner=name;
+
+}
+
+
+}
+
+);
+
+
+
+document
+.querySelector(".badge")
+.innerHTML =
+
+
+winner
+
+?
+
+`
+🏆 ${winner}
+
+<br>
+
+${score} Points
+`
+
+:
+
+"No Scores Yet";
+
+
+}
+/********************************************
+ PARTNER CARD MANAGEMENT
+********************************************/
+
+
+let partnerCards=[];
+
+let partners=[];
+
+
+
+
+function createPartnerCardSelectors(){
+
+
+const container =
+document.getElementById(
+"partnerCardsContainer"
+);
+
+
+
+container.innerHTML="";
+
+
+
+const suits=[
+
+"♠",
+"♥",
+"♦",
+"♣"
+
+];
+
+
+const ranks=[
+
+"A",
+"K",
+"Q",
+"J",
+"3"
+
+];
+
+
+
+for(
+let i=1;
+i<=4;
+i++
+){
+
+
+let select =
+document.createElement(
+"select"
+);
+
+
+
+select.className =
+"partner-card";
+
+
+
+select.innerHTML =
+
+`
+<option value="">
+Card ${i}
+</option>
+`;
+
+
+
+suits.forEach(
+
+function(suit){
+
+
+ranks.forEach(
+
+function(rank){
+
+
+select.insertAdjacentHTML(
+
+"beforeend",
+
+`
+
+<option value="${suit}${rank}">
+${suit} ${rank}
+</option>
+
+`
+
+);
+
+
+}
+
+);
+
+
+}
+
+);
+
+
+
+container.appendChild(select);
+
+
+
+select.addEventListener(
+"change",
+savePartnerCards
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+/********************************************
+ PARTNER NAME DROPDOWNS
+********************************************/
+
+
+function createPartnerNameSelectors(){
+
+
+const container =
+document.getElementById(
+"partnerNamesContainer"
+);
+
+
+
+container.innerHTML="";
+
+
+
+for(
+let i=1;
+i<=4;
+i++
+){
+
+
+let select =
+document.createElement(
+"select"
+);
+
+
+
+select.className =
+"partner-name";
+
+
+
+select.style.marginBottom =
+"10px";
+
+
+
+select.innerHTML =
+
+`
+
+<option value="">
+Partner ${i}
+</option>
+
+`;
+
+
+
+select.addEventListener(
+"change",
+validatePartners
+);
+
+
+
+container.appendChild(select);
+
+
+
+}
+
+
+
+refreshPartnerDropdowns();
+
+
+
+}
+
+
+
+
+function refreshPartnerDropdowns(){
+
+
+
+document
+.querySelectorAll(
+".partner-name"
+)
+.forEach(
+
+function(select){
+
+
+
+let oldValue =
+select.value;
+
+
+
+select.innerHTML =
+
+`
+
+<option value="">
+Select Partner
+</option>
+
+`;
+
+
+
+players.forEach(
+
+function(player){
+
+
+select.insertAdjacentHTML(
+
+"beforeend",
+
+`
+
+<option value="${player.name}">
+${player.name}
+</option>
+
+`
+
+);
+
+
+}
+
+);
+
+
+
+select.value=oldValue;
+
+
+
+}
+
+);
+
+
+}
+
+
+
+
+
+
+function validatePartners(){
+
+
+let selected=[];
+
+
+
+document
+.querySelectorAll(
+".partner-name"
+)
+.forEach(
+
+function(select){
+
+
+if(select.value){
+
+selected.push(
+select.value
+);
+
+}
+
+
+}
+
+);
+
+
+
+
+let duplicate =
+selected.some(
+
+function(name,index){
+
+return selected.indexOf(name)!==index;
+
+}
+
+);
+
+
+
+if(duplicate){
+
+
+alert(
+"Same player cannot be selected twice"
+);
+
+
+this.value="";
+
+
+}
+
+
+
+savePartners();
+
+
+
+}
+
+
+
+
+
+
+function savePartnerCards(){
+
+
+partnerCards=[];
+
+
+
+document
+.querySelectorAll(
+".partner-card"
+)
+.forEach(
+
+function(card){
+
+
+partnerCards.push(
+card.value
+);
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+function savePartners(){
+
+
+partners=[];
+
+
+
+document
+.querySelectorAll(
+".partner-name"
+)
+.forEach(
+
+function(select){
+
+
+if(select.value){
+
+
+partners.push(
+select.value
+);
+
+
+}
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+/********************************************
+ SAFARI SAFE LOCAL STORAGE
+********************************************/
+
+
+function saveGame(){
+
+
+
+let data={
+
+
+players:players,
+
+rounds:rounds,
+
+roundCount:roundCount,
+
+partners:partners,
+
+partnerCards:partnerCards,
+
+
+bidder:
+document.getElementById(
+"highestBidder"
+).value,
+
+
+bid:
+document.getElementById(
+"bidPoints"
+).value,
+
+
+wild:
+document.getElementById(
+"wildSuit"
+).value
+
+
+};
+
+
+
+
+try{
+
+
+localStorage.setItem(
+
+"kariNiTiri",
+
+JSON.stringify(data)
+
+);
+
+
+}
+
+catch(e){
+
+
+console.log(
+"Local storage unavailable"
+);
+
+
+}
+
+
+}
+
+
+
+
+
+function loadGame(){
+
+
+let saved=null;
+
+
+
+try{
+
+
+saved =
+localStorage.getItem(
+"kariNiTiri"
+);
+
+
+
+}
+
+catch(e){
+
+
+saved=null;
+
+
+}
+
+
+
+
+
+if(!saved){
+
+return;
+
+}
+
+
+
+let data =
+JSON.parse(saved);
+
+
+
+players =
+data.players || [];
+
+
+
+rounds =
+data.rounds || [];
+
+
+
+roundCount =
+data.roundCount || 0;
+
+
+
+partnerCards =
+data.partnerCards || [];
+
+
+
+partners =
+data.partners || [];
+
+
+
+
+refreshPlayerUI();
+
+
+
+
+
+document
+.getElementById(
+"highestBidder"
+)
+.value =
+data.bidder || "";
+
+
+
+
+document
+.getElementById(
+"bidPoints"
+)
+.value =
+data.bid || "275";
+
+
+
+
+document
+.getElementById(
+"wildSuit"
+)
+.value =
+data.wild || "♠ Spades";
+
+
+
+}
+
+
+
+
+
+
+
+
+/********************************************
+ RESET GAME
+********************************************/
+
+
+function resetGame(){
+
+
+if(
+!confirm(
+"Start a new game?"
+)
+
+){
+
+return;
+
+}
+
+
+
+
+try{
+
+
+localStorage.removeItem(
+"kariNiTiri"
+);
+
+
+}
+
+catch(e){}
+
+
+
+
+players=[];
+
+rounds=[];
+
+roundCount=0;
+
+
+
+
+document
+.getElementById(
+"scoreBody"
+)
+.innerHTML="";
+
+
+
+buildTableHeader();
+
+buildTotalRow();
+
+updateStatistics();
+
+
+
+
+document
+.querySelector(
+".badge"
+)
+.innerHTML =
+"No Scores Yet";
+
+
+
+
+createPartnerCardSelectors();
+
+createPartnerNameSelectors();
+
+
+
+}
+
+
+
+
+
+
+/********************************************
+ AUTO SAVE
+********************************************/
+
+
+document.addEventListener(
+
+"input",
+
+function(){
+
+saveGame();
+
+}
+
+);
+
+
+
+document.addEventListener(
+
+"change",
+
+function(){
+
+saveGame();
+
+}
+
+);
+
+
+
+
+
+
+
+/********************************************
+ FINAL START
+********************************************/
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+function(){
+
+
+setTimeout(
+
+function(){
+
+loadGame();
+
+},
+
+300
+
+);
+
+
+});
+
+
+
+</script>
+
+
+</body>
+
+</html>
