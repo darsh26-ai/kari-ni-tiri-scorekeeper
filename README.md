@@ -1,2 +1,2 @@
-# kari-ni-tiri-scorekeeper
-Kari Tiri
+# kari-3-score Board
+Kari ni Tiri
