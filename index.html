@@ -250,7 +250,25 @@ input{
 
 }
 
+.red-card{
+    color:red;
+    font-weight:bold;
+}
 
+.black-card{
+    color:black;
+    font-weight:bold;
+}
+
+.red-card-selected {
+    color:red !important;
+    font-weight:bold;
+}
+
+.black-card-selected {
+    color:black !important;
+    font-weight:bold;
+}
 
 /* =========================
    PARTNER AREA
@@ -660,6 +678,20 @@ button{
 
 }
 
+.card-position{
+
+margin-bottom:10px;
+
+}
+
+.red {
+    color: red;
+}
+
+.black {
+    color: black;
+}
+
 
 </style>
 
@@ -733,39 +765,16 @@ Select Player
 
 
 
-
 <div class="card">
 
+<label>Wild Card </label>
 
-<label>
-♠ Wild Suit
-</label>
-
-
-<select id="wildSuit">
-
-<option>
-♠ Spades
-</option>
-
-
-<option>
-♥ Hearts
-</option>
-
-
-<option>
-♦ Diamonds
-</option>
-
-
-<option>
-♣ Clubs
-</option>
-
-
+<select id="wildSuit" onchange="this.style.color=this.options[this.selectedIndex].dataset.color">
+    <option data-color="black" style="color:black">♠ Spades</option>
+    <option data-color="red" style="color:red">♥ Hearts</option>
+    <option data-color="red" style="color:red">♦ Diamonds</option>
+    <option data-color="black" style="color:black">♣ Clubs</option>
 </select>
-
 
 </div>
 
@@ -855,8 +864,22 @@ placeholder="Enter Player Name"
 </button>
 
 
+<button class="round" id="bidWin">
 
-<button class="reset">
+🏆 Bidder Won
+
+</button>
+
+
+<button class="round" id="bidLose">
+
+❌ Bidder Lost
+
+</button>
+
+
+
+<button class="reset" id="resetGame">
 
 🧹 Reset
 
@@ -1033,6 +1056,8 @@ let rounds = [];
 
 let roundCount = 0;
 
+let currentRound = null;
+
 
 const playerColors = [
 
@@ -1076,6 +1101,35 @@ function(){
         addRound
     );
 
+	document
+.getElementById("bidWin")
+.addEventListener(
+"click",
+function(){
+
+if(!prepareCurrentRound())
+return;
+
+
+applyResult("WIN");
+
+
+});
+
+document
+.getElementById("bidLose")
+.addEventListener(
+"click",
+function(){
+
+if(!prepareCurrentRound())
+return;
+
+
+applyResult("LOSE");
+
+
+});
 
     document
     .querySelector(".reset")
@@ -1223,6 +1277,8 @@ input.value="";
 
 
 refreshPlayerUI();
+
+restoreRounds();
 
 
 }
@@ -1558,23 +1614,33 @@ roundCount;
 
 function addRound(){
 
-
 if(players.length===0){
 
-
-alert(
-"Add players first"
-);
-
-
+alert("Add players first");
 return;
 
 }
 
 
-
 roundCount++;
 
+
+currentRound = {
+
+number: roundCount,
+
+bidder:"",
+
+bid:0,
+
+partners:[],
+
+result:""
+
+
+};
+rounds.push(currentRound);
+saveGame();
 
 
 let tbody =
@@ -1583,29 +1649,26 @@ document.getElementById(
 );
 
 
-
 let row =
-document.createElement(
-"tr"
-);
+document.createElement("tr");
+
+
+row.dataset.round =
+roundCount;
 
 
 
 row.innerHTML =
 
 `
-
 <td>
-Round ${roundCount}
+Game ${roundCount}
 </td>
-
 `;
 
 
 
-players.forEach(
-
-function(player){
+players.forEach(function(player){
 
 
 row.insertAdjacentHTML(
@@ -1626,6 +1689,8 @@ class="score-input"
 
 data-player="${player.name}"
 
+readonly
+
 >
 
 </td>
@@ -1638,23 +1703,20 @@ data-player="${player.name}"
 });
 
 
-
 tbody.appendChild(row);
 
+saveGame();
 
+alert(
+"Round created. Now select bidder, bid points and partners"
+);
 
-attachScoreEvents();
 
 
 updateStatistics();
 
 
-
 }
-
-
-
-
 
 
 
@@ -1677,6 +1739,58 @@ calculateTotals;
 }
 
 );
+
+
+}
+
+function prepareCurrentRound(){
+
+
+if(!currentRound){
+
+alert(
+"Add a round first"
+);
+
+return false;
+
+}
+
+
+
+currentRound.bidder =
+document.getElementById(
+"highestBidder"
+).value;
+
+
+
+currentRound.bid =
+Number(
+document.getElementById(
+"bidPoints"
+).value
+);
+
+
+
+currentRound.partners =
+[...partners];
+
+
+
+if(!currentRound.bidder){
+
+alert(
+"Select Highest Bidder"
+);
+
+return false;
+
+}
+
+
+return true;
 
 
 }
@@ -1769,7 +1883,7 @@ updateHighestScore(totals);
 
 updateLeader(totals);
 
-
+saveGame();
 
 }
 
@@ -1888,125 +2002,81 @@ let partnerCards=[];
 
 let partners=[];
 
+// Current round result
+let roundResult = "";
 
 
+function createPartnerCardSelectors() {
 
-function createPartnerCardSelectors(){
+  const container = document.getElementById("partnerCardsContainer");
+  container.innerHTML = "";
 
+  const suits = [
+    { symbol: "♠", color: "black" },
+    { symbol: "♥", color: "red" },
+    { symbol: "♦", color: "red" },
+    { symbol: "♣", color: "black" }
+  ];
 
-const container =
-document.getElementById(
-"partnerCardsContainer"
-);
+  const ranks = ["A", "K", "Q", "J", "3"];
 
+  for (let i = 1; i <= 4; i++) {
 
+    // horizontal wrapper
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.flexDirection = "row";
+    row.style.alignItems = "center";
+    row.style.gap = "12px";
 
-container.innerHTML="";
+    // First / Second selector
+    let position = document.createElement("select");
+    position.className = "card-position";
 
+    position.innerHTML = `
+      <option value="">Select</option>
+      <option value="First">First</option>
+      <option value="Second">Second</option>
+    `;
 
+    // Card selector
+    let select = document.createElement("select");
+    select.className = "partner-card";
 
-const suits=[
+    let empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Select Card";
+    select.appendChild(empty);
 
-"♠",
-"♥",
-"♦",
-"♣"
+    suits.forEach(function (suit) {
+      ranks.forEach(function (rank) {
+        let option = document.createElement("option");
+        option.value = suit.symbol + rank;
+        option.textContent = suit.symbol + " " + rank;
+        option.style.color = suit.color;
+        select.appendChild(option);
+      });
+    });
 
-];
+    // append horizontally
+    row.appendChild(position);
+    row.appendChild(select);
 
+    container.appendChild(row);
 
-const ranks=[
+    // color logic
+    select.addEventListener("change", function () {
+      savePartnerCards();
 
-"A",
-"K",
-"Q",
-"J",
-"3"
-
-];
-
-
-
-for(
-let i=1;
-i<=4;
-i++
-){
-
-
-let select =
-document.createElement(
-"select"
-);
-
-
-
-select.className =
-"partner-card";
-
-
-
-select.innerHTML =
-
-`
-<option value="">
-Card ${i}
-</option>
-`;
-
-
-
-suits.forEach(
-
-function(suit){
-
-
-ranks.forEach(
-
-function(rank){
-
-
-select.insertAdjacentHTML(
-
-"beforeend",
-
-`
-
-<option value="${suit}${rank}">
-${suit} ${rank}
-</option>
-
-`
-
-);
-
-
-}
-
-);
-
-
-}
-
-);
-
-
-
-container.appendChild(select);
-
-
-
-select.addEventListener(
-"change",
-savePartnerCards
-);
-
-
-
-}
-
-
-
+      if (select.value.includes("♥") || select.value.includes("♦")) {
+        select.className = "partner-card red-card-selected";
+      } else if (select.value.includes("♠") || select.value.includes("♣")) {
+        select.className = "partner-card black-card-selected";
+      } else {
+        select.className = "partner-card";
+      }
+    });
+  }
 }
 
 
@@ -2390,114 +2460,256 @@ console.log(
 
 function loadGame(){
 
+    let saved = localStorage.getItem("kariNiTiri");
 
-let saved=null;
+    if(!saved){
+        return;
+    }
+
+    let data = JSON.parse(saved);
+
+
+    players = data.players || [];
+
+    rounds = data.rounds || [];
+
+    roundCount = data.roundCount || 0;
+
+    partners = data.partners || [];
+
+    partnerCards = data.partnerCards || [];
+
+
+    refreshPlayerUI();
+
+
+    // restore rounds table
+    restoreRounds();
+
+
+    document.getElementById("highestBidder").value =
+        data.bidder || "";
+
+
+    document.getElementById("bidPoints").value =
+        data.bid || "275";
+
+
+    document.getElementById("wildSuit").value =
+        data.wild || "♠ Spades";
+
+
+    calculateTotals();
+
+}
+
+function restoreRounds(){
+
+    let tbody =
+    document.getElementById("scoreBody");
+
+
+    tbody.innerHTML="";
+
+
+    rounds.forEach(function(round){
+
+
+        let row=document.createElement("tr");
+
+
+        row.dataset.round =
+        round.number;
 
 
 
-try{
+        row.innerHTML =
+        `
+        <td>
+        Game ${round.number}
+        </td>
+        `;
 
 
-saved =
-localStorage.getItem(
-"kariNiTiri"
+
+        players.forEach(function(player){
+
+
+            let score =
+            round.scores[player.name] || 0;
+
+
+            row.insertAdjacentHTML(
+            "beforeend",
+
+            `
+            <td>
+
+            <input
+            type="number"
+            class="score-input"
+            value="${score}"
+            data-player="${player.name}"
+            readonly>
+
+            </td>
+            `
+
+            );
+
+
+        });
+
+
+
+        tbody.appendChild(row);
+
+
+    });
+
+
+    calculateTotals();
+
+}
+
+function applyResult(result){
+
+
+let rows =
+document.querySelectorAll(
+"#scoreBody tr"
+);
+
+
+let row =
+rows[rows.length-1];
+
+
+let inputs =
+row.querySelectorAll(
+".score-input"
 );
 
 
 
-}
+inputs.forEach(function(input){
 
-catch(e){
+let player = input.dataset.player;
 
-
-saved=null;
-
-
-}
+let score = 0;
 
 
+// BIDDER
+if(player === currentRound.bidder){
 
+    if(result === "WIN"){
 
+        score = currentRound.bid * 2;
 
-if(!saved){
+    }
+    else if(result === "LOSE"){
 
-return;
+        score = -currentRound.bid;
 
-}
-
-
-
-let data =
-JSON.parse(saved);
-
-
-
-players =
-data.players || [];
-
-
-
-rounds =
-data.rounds || [];
-
-
-
-roundCount =
-data.roundCount || 0;
-
-
-
-partnerCards =
-data.partnerCards || [];
-
-
-
-partners =
-data.partners || [];
-
-
-
-
-refreshPlayerUI();
-
-
-
-
-
-document
-.getElementById(
-"highestBidder"
-)
-.value =
-data.bidder || "";
-
-
-
-
-document
-.getElementById(
-"bidPoints"
-)
-.value =
-data.bid || "275";
-
-
-
-
-document
-.getElementById(
-"wildSuit"
-)
-.value =
-data.wild || "♠ Spades";
-
-
+    }
 
 }
 
 
+// PARTNERS
+else if(currentRound.partners.includes(player)){
+
+    if(result === "WIN"){
+
+        score = currentRound.bid;
+
+    }
+    else if(result === "LOSE"){
+
+        score = 0;
+
+    }
+
+}
 
 
+// NON PARTNERS
+else{
+
+    if(result === "LOSE"){
+
+        score = currentRound.bid;
+
+    }
+    else if(result === "WIN"){
+
+        score = 0;
+
+    }
+
+}
+
+
+input.value = score;
+
+
+});
+
+
+
+currentRound.result = result;
+
+
+// Save scores into round history
+let roundData = {
+
+number: currentRound.number,
+
+bidder: currentRound.bidder,
+
+bid: currentRound.bid,
+
+partners: currentRound.partners,
+
+result: currentRound.result,
+
+scores:{}
+
+};
+
+
+
+inputs.forEach(function(input){
+
+roundData.scores[input.dataset.player] =
+Number(input.value);
+
+});
+
+
+
+rounds.push(roundData);
+
+
+
+saveGame();
+
+
+
+calculateTotals();
+
+
+
+row.cells[0].innerHTML =
+"Game "+
+currentRound.number;
+
+
+
+currentRound=null;
+
+
+}
 
 
 
@@ -2518,6 +2730,8 @@ if(
 ){
 
 return;
+
+localStorage.clear();
 
 }
 
@@ -2621,7 +2835,28 @@ saveGame();
 
 
 
+function updateWildSuit(){
 
+    let suit = document.getElementById("wildSuit").value;
+    let symbol = document.getElementById("wildSymbol");
+
+    if(suit === "heart"){
+        symbol.innerHTML = "♥";
+        symbol.className = "red";
+    }
+    else if(suit === "diamond"){
+        symbol.innerHTML = "♦";
+        symbol.className = "red";
+    }
+    else if(suit === "club"){
+        symbol.innerHTML = "♣";
+        symbol.className = "black";
+    }
+    else {
+        symbol.innerHTML = "♠";
+        symbol.className = "black";
+    }
+}
 
 
 
@@ -2660,4 +2895,3 @@ loadGame();
 </body>
 
 </html>
-
