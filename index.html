@@ -2721,79 +2721,56 @@ currentRound=null;
 
 function resetGame(){
 
+    const password = prompt("Enter password to reset the game:");
 
-if(
-!confirm(
-"Start a new game?"
-)
+    // User clicked Cancel
+    if(password === null){
+        return;
+    }
 
-){
+    // Check password
+    if(password !== "Na maza aavi"){
+        alert("❌ Incorrect password!");
+        return;
+    }
 
-return;
+    // Final confirmation
+    if(!confirm("Start a new game?")){
+        return;
+    }
 
-localStorage.clear();
+    try{
+        localStorage.removeItem("kariNiTiri");
+        // or localStorage.clear(); if you want to remove ALL local storage
+    }
+    catch(e){}
 
-}
+    players = [];
+    rounds = [];
+    roundCount = 0;
+    currentRound = null;
+    partners = [];
+    partnerCards = [];
 
+    document.getElementById("scoreBody").innerHTML = "";
 
+    document.getElementById("playerName").value = "";
+    document.getElementById("highestBidder").innerHTML =
+        '<option value="">Select Player</option>';
 
+    buildTableHeader();
+    buildTotalRow();
+    updateStatistics();
 
-try{
+    document.getElementById("highestScore").innerHTML = "0";
 
+    document.querySelector(".badge").innerHTML =
+        "No Scores Yet";
 
-localStorage.removeItem(
-"kariNiTiri"
-);
+    createPartnerCardSelectors();
+    createPartnerNameSelectors();
 
-
-}
-
-catch(e){}
-
-
-
-
-players=[];
-
-rounds=[];
-
-roundCount=0;
-
-
-
-
-document
-.getElementById(
-"scoreBody"
-)
-.innerHTML="";
-
-
-
-buildTableHeader();
-
-buildTotalRow();
-
-updateStatistics();
-
-
-
-
-document
-.querySelector(
-".badge"
-)
-.innerHTML =
-"No Scores Yet";
-
-
-
-
-createPartnerCardSelectors();
-
-createPartnerNameSelectors();
-
-
+    alert("✅ Game has been reset successfully.");
 
 }
 
