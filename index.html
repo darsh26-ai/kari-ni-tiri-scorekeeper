@@ -591,7 +591,21 @@ tfoot{
 
 }
 
+/* =========================
+   EDIT BUTTON
+========================= */
 
+.edit-btn {
+    margin-top:8px;
+
+    padding:5px 12px;
+
+    background:#d3d3d3;
+
+    border-radius:8px;
+
+    font-size:12px;
+}
 
 /* =========================
    REMOVE BUTTON
@@ -693,6 +707,40 @@ margin-bottom:10px;
 
 .black {
     color: black;
+}
+
+.ranking-list {
+  margin-top: 20px;
+  padding: 10px 0;
+  border-radius: 12px;
+}
+
+.rank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff20, #ffffff05);
+  padding: 12px 16px;
+  margin: 6px 0;
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 16px;
+}
+
+.rank-number {
+  font-weight: bold;
+  color: gold;
+}
+
+.rank-name {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.rank-points {
+  font-weight: bold;
+  color: #ffd700;
 }
 
 
@@ -880,6 +928,9 @@ placeholder="Enter Player Name"
 
 </button>
 
+<button class="round" id="undoRound">
+↩️ Undo Last Round
+</button>
 
 
 <button class="reset" id="resetGame">
@@ -1037,6 +1088,8 @@ No Scores Yet
 
 </div>
 
+<div id="remainingRankingContainer" class="ranking-list"></div>
+
 
 </aside>
 
@@ -1149,6 +1202,51 @@ applyResult("LOSE");
 
 });
 
+/********************************************
+ Undo Button
+********************************************/
+
+document.getElementById("undoRound").addEventListener("click", undoLastRound);
+
+function undoLastRound() {
+
+    // Ask for password
+    const password = prompt("Enter password to undo last round:");
+
+    if (password === null) {
+        return; // user pressed cancel
+    }
+
+    if (password !== "Innocent mistake") {
+        alert("❌ Incorrect password!");
+        return;
+    }
+
+    if (rounds.length === 0) {
+        alert("No rounds to undo");
+        return;
+    }
+
+    // Remove last completed round
+    const removed = rounds.pop();
+
+    // Fix round counter
+    roundCount = rounds.length;
+
+    // Remove last row from UI
+    const tbody = document.getElementById("scoreBody");
+    if (tbody.lastElementChild) {
+        tbody.removeChild(tbody.lastElementChild);
+    }
+
+    // Recalculate totals
+    calculateTotals();
+
+    // Save updated game state
+    saveGame();
+
+    alert("Last round undone: Game " + removed.number);
+}
 
 
 
@@ -1397,17 +1495,14 @@ ${player.name}
 <br>
 
 
-<button
-
-class="remove-btn"
-
-data-player="${player.name}"
-
->
-
-✖ Remove
-
+<button class="edit-btn" data-player="${player.name}">
+✎ Edit
 </button>
+
+<button class="remove-btn" data-player="${player.name}">
+✖ Remove
+</button>
+
 
 
 </th>
@@ -1430,6 +1525,13 @@ data-player="${player.name}"
 /********************************************
  SAFARI CLICK HANDLER
 ********************************************/
+document.addEventListener("click", function(event) {
+
+    if (event.target.classList.contains("edit-btn")) {
+        editPlayerName(event.target.dataset.player);
+    }
+
+});
 
 
 document.addEventListener(
@@ -1460,8 +1562,63 @@ event.target.dataset.player
 );
 
 
+/********************************************
+ Edit player name
+********************************************/
 
+function editPlayerName(oldName) {
 
+    const newName = prompt("Enter new name for " + oldName + ":").trim();
+
+    if (!newName) {
+        alert("Name cannot be empty");
+        return;
+    }
+
+    if (players.some(p => p.name.toLowerCase() === newName.toLowerCase())) {
+        alert("A player with this name already exists");
+        return;
+    }
+
+    // Update player list
+    players = players.map(p => {
+        if (p.name === oldName) {
+            return { ...p, name: newName };
+        }
+        return p;
+    });
+
+    // Update totals row IDs
+    const totalCell = document.getElementById("total-" + oldName);
+    if (totalCell) {
+        totalCell.id = "total-" + newName;
+    }
+
+    // Update score inputs in all rounds
+    document.querySelectorAll(`input[data-player="${oldName}"]`)
+        .forEach(input => {
+            input.dataset.player = newName;
+        });
+
+    // Update rounds data structure
+    rounds.forEach(r => {
+        if (r.scores[oldName] !== undefined) {
+            r.scores[newName] = r.scores[oldName];
+            delete r.scores[oldName];
+        }
+    });
+
+    // Update partners list
+    partners = partners.map(p => p === oldName ? newName : p);
+
+    // Refresh UI
+    refreshPlayerUI();
+    restoreRounds();
+    calculateTotals();
+    saveGame();
+
+    alert("Player name updated successfully.");
+}
 
 
 
@@ -1642,7 +1799,7 @@ result:""
 
 
 };
-rounds.push(currentRound);
+
 saveGame();
 
 
@@ -2015,10 +2172,10 @@ function createPartnerCardSelectors() {
   container.innerHTML = "";
 
   const suits = [
-    { symbol: "♠", color: "black" },
-    { symbol: "♥", color: "red" },
-    { symbol: "♦", color: "red" },
-    { symbol: "♣", color: "black" }
+    { symbol: "♠", name: "Spade", color: "black" },
+    { symbol: "♥", name: "Heart", color: "red" },
+    { symbol: "♦", name: "Diamond", color: "red" },
+    { symbol: "♣", name: "Club", color: "black" }
   ];
 
   const ranks = ["A", "K", "Q", "J", "3"];
@@ -2035,53 +2192,53 @@ function createPartnerCardSelectors() {
     // First / Second selector
     let position = document.createElement("select");
     position.className = "card-position";
-
     position.innerHTML = `
       <option value="">Select</option>
       <option value="First">First</option>
       <option value="Second">Second</option>
     `;
 
-    // Card selector
-    let select = document.createElement("select");
-    select.className = "partner-card";
+    // Suit dropdown
+    let suitSelect = document.createElement("select");
+    suitSelect.className = "partner-suit";
+    suitSelect.innerHTML = `
+      <option value="">Suit</option>
+      ${suits.map(s => 
+        `<option value="${s.symbol}" style="color:${s.color};">${s.symbol} ${s.name}</option>`
+      ).join("")}
+    `;
 
-    let empty = document.createElement("option");
-    empty.value = "";
-    empty.textContent = "Select Card";
-    select.appendChild(empty);
+    // Rank dropdown
+    let rankSelect = document.createElement("select");
+    rankSelect.className = "partner-rank";
+    rankSelect.innerHTML = `
+      <option value="">Rank</option>
+      ${ranks.map(r => `<option value="${r}">${r}</option>`).join("")}
+    `;
 
-    suits.forEach(function (suit) {
-      ranks.forEach(function (rank) {
-        let option = document.createElement("option");
-        option.value = suit.symbol + rank;
-        option.textContent = suit.symbol + " " + rank;
-        option.style.color = suit.color;
-        select.appendChild(option);
-      });
-    });
-
-    // append horizontally
+    // Append horizontally
     row.appendChild(position);
-    row.appendChild(select);
+    row.appendChild(suitSelect);
+    row.appendChild(rankSelect);
 
     container.appendChild(row);
 
-    // color logic
-    select.addEventListener("change", function () {
-      savePartnerCards();
+    // Save on change
+    suitSelect.addEventListener("change", savePartnerCards);
+    rankSelect.addEventListener("change", savePartnerCards);
 
-      if (select.value.includes("♥") || select.value.includes("♦")) {
-        select.className = "partner-card red-card-selected";
-      } else if (select.value.includes("♠") || select.value.includes("♣")) {
-        select.className = "partner-card black-card-selected";
+    // Color logic for suit dropdown
+    suitSelect.addEventListener("change", function () {
+      if (suitSelect.value === "♥" || suitSelect.value === "♦") {
+        suitSelect.className = "partner-suit red-card-selected";
+      } else if (suitSelect.value === "♠" || suitSelect.value === "♣") {
+        suitSelect.className = "partner-suit black-card-selected";
       } else {
-        select.className = "partner-card";
+        suitSelect.className = "partner-suit";
       }
     });
   }
 }
-
 
 
 
@@ -2309,33 +2466,21 @@ savePartners();
 
 
 
-function savePartnerCards(){
+function savePartnerCards() {
+  partnerCards = [];
 
+  const suitSelects = document.querySelectorAll(".partner-suit");
+  const rankSelects = document.querySelectorAll(".partner-rank");
 
-partnerCards=[];
+  for (let i = 0; i < suitSelects.length; i++) {
+    let suit = suitSelects[i].value;
+    let rank = rankSelects[i].value;
 
+    let card = suit && rank ? suit + rank : "";
+    partnerCards.push(card);
+  }
 
-
-document
-.querySelectorAll(
-".partner-card"
-)
-.forEach(
-
-function(card){
-
-
-partnerCards.push(
-card.value
-);
-
-
-}
-
-);
-
-
-
+  saveGame();
 }
 
 
@@ -2780,8 +2925,6 @@ function resetGame(){
 
 
 
-
-
 /********************************************
  AUTO SAVE
 ********************************************/
@@ -2838,6 +2981,39 @@ function updateWildSuit(){
     }
 }
 
+/********************************************
+ Remianing after Leader
+********************************************/
+
+function getRemainingRanking() {
+  let ranking = players.map(player => ({
+    name: player.name,
+    total: player.total || 0
+  }));
+
+  ranking.sort((a, b) => b.total - a.total);
+
+  ranking.shift(); // remove leader
+
+  return ranking;
+}
+
+function updateRemainingRankingUI() {
+  let ranking = getRemainingRanking();
+  const container = document.getElementById("remainingRankingContainer");
+
+  container.innerHTML = "";
+
+  ranking.forEach((player, index) => {
+    container.insertAdjacentHTML("beforeend", `
+      <div class="rank-row">
+        <span class="rank-number">#${index + 2}</span>
+        <span class="rank-name">${player.name}</span>
+        <span class="rank-points">${player.total} pts</span>
+      </div>
+    `);
+  });
+}
 
 
 /********************************************
