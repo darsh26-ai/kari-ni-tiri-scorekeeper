@@ -1875,8 +1875,17 @@ alert(
 
 updateStatistics();
 
+// ⭐ Reset partners for new round
+partners = [];
+partnerCards = [];
+	
 document.getElementById("highestBidder").value = "";
+// ⭐ Clear partner name dropdowns
+document.querySelectorAll(".partner-name").forEach(sel => sel.value = "");
 
+// ⭐ Clear partner card dropdowns
+document.querySelectorAll(".partner-suit").forEach(sel => sel.value = "");
+document.querySelectorAll(".partner-rank").forEach(sel => sel.value = "");
 
 }
 
@@ -2204,7 +2213,7 @@ function createPartnerCardSelectors() {
     let suitSelect = document.createElement("select");
     suitSelect.className = "partner-suit";
     suitSelect.innerHTML = `
-      <option value="">Suit</option>
+      <option value="">Color</option>
       ${suits.map(s => 
         `<option value="${s.symbol}" style="color:${s.color};">${s.symbol} ${s.name}</option>`
       ).join("")}
@@ -2214,7 +2223,7 @@ function createPartnerCardSelectors() {
     let rankSelect = document.createElement("select");
     rankSelect.className = "partner-rank";
     rankSelect.innerHTML = `
-      <option value="">Rank</option>
+      <option value="">Card</option>
       ${ranks.map(r => `<option value="${r}">${r}</option>`).join("")}
     `;
 
