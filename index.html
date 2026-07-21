@@ -288,6 +288,21 @@ input{
 
 }
 
+.partner-card-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.partner-card-row select {
+  width: 120px;      /* same width */
+  height: 36px;      /* same height */
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
 
 
 /* =========================
@@ -591,6 +606,16 @@ tfoot{
 
 }
 
+#remainingUnderLeader .rank-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  margin-top: 4px;
+  font-size: 14px;
+  color: white;
+}
+
+
 /* =========================
    EDIT BUTTON
 ========================= */
@@ -730,17 +755,18 @@ margin-bottom:10px;
 
 .rank-number {
   font-weight: bold;
-  color: gold;
+  color: black;
 }
 
 .rank-name {
   flex: 1;
   margin-left: 10px;
+  color: white !important;
 }
 
 .rank-points {
   font-weight: bold;
-  color: #ffd700;
+  color: black;
 }
 
 
@@ -1088,7 +1114,8 @@ No Scores Yet
 
 </div>
 
-<div id="remainingRankingContainer" class="ranking-list"></div>
+<div id="remainingUnderLeader"></div>
+
 
 
 </aside>
@@ -1876,16 +1903,20 @@ alert(
 updateStatistics();
 
 // ⭐ Reset partners for new round
-partners = [];
-partnerCards = [];
-	
-document.getElementById("highestBidder").value = "";
-// ⭐ Clear partner name dropdowns
-document.querySelectorAll(".partner-name").forEach(sel => sel.value = "");
+    partners = [];
+    partnerCards = [];
 
-// ⭐ Clear partner card dropdowns
-document.querySelectorAll(".partner-suit").forEach(sel => sel.value = "");
-document.querySelectorAll(".partner-rank").forEach(sel => sel.value = "");
+document.getElementById("highestBidder").value = "";
+
+
+    
+
+    // ⭐ Clear partner name dropdowns
+    document.querySelectorAll(".partner-name").forEach(sel => sel.value = "");
+
+    // ⭐ Clear partner card dropdowns
+    document.querySelectorAll(".partner-suit").forEach(sel => sel.value = "");
+    document.querySelectorAll(".partner-rank").forEach(sel => sel.value = "");
 
 }
 
@@ -2048,11 +2079,18 @@ totals[player.name];
 
 });
 
-
+// ⭐ Write totals back into each player object
+players.forEach(player => {
+  player.total = totals[player.name] || 0;
+});
 
 updateHighestScore(totals);
 
 updateLeader(totals);
+
+updateRemainingUnderLeader();
+
+updateRemainingRankingUI();
 
 saveGame();
 
@@ -2195,10 +2233,7 @@ function createPartnerCardSelectors() {
 
     // horizontal wrapper
     const row = document.createElement("div");
-    row.style.display = "flex";
-    row.style.flexDirection = "row";
-    row.style.alignItems = "center";
-    row.style.gap = "12px";
+    row.className = "partner-card-row";
 
     // First / Second selector
     let position = document.createElement("select");
@@ -3018,13 +3053,31 @@ function updateRemainingRankingUI() {
   ranking.forEach((player, index) => {
     container.insertAdjacentHTML("beforeend", `
       <div class="rank-row">
-        <span class="rank-number">#${index + 2}</span>
+        <span class="rank-number">${index + 2}</span>
         <span class="rank-name">${player.name}</span>
         <span class="rank-points">${player.total} pts</span>
       </div>
     `);
   });
 }
+
+function updateRemainingUnderLeader() {
+  let ranking = getRemainingRanking();
+  const container = document.getElementById("remainingUnderLeader");
+
+  container.innerHTML = "";
+
+  ranking.forEach((player, index) => {
+    container.insertAdjacentHTML("beforeend", `
+      <div class="rank-row">
+        <span class="rank-number">${index + 2}</span>
+        <span class="rank-name">${player.name}</span>
+        <span class="rank-points">${player.total} pts</span>
+      </div>
+    `);
+  });
+}
+
 
 
 /********************************************
